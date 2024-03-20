@@ -1,0 +1,243 @@
+import math
+
+
+class Dataset:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+
+class Calculo(Dataset):
+    #usamos los privados en costructor para 
+    #ayudarnos en sola esta clase funcionan.
+    def __init__(self, x, y,n):
+        super().__init__(x, y)
+        self.x = x
+        self.y = y
+        #para que no hayga datos en costructor podemos poner
+        #como dato privado
+        self.n = n
+      
+
+    # adverting x
+    def sumx(self):
+        
+         sumax = sum(self.x)
+         return sumax
+          
+    #sales y 
+    def sumy(self):
+
+          sumay=sum(self.y) 
+          return sumay
+
+    #x^2
+    def sumxsquad(self):
+        total = 0
+        for i in self.x:
+            squad = i ** 2
+            #aqui se va almacenar y se va ir sumando
+            total += squad
+        return total
+    
+    #sumX * sumX
+    def sumxSumx(self):
+        total = sum(self.x) * sum(self.x) 
+        return total
+    
+    #n * sumxy
+    def nsumxy(self):
+        total = self.sumxy() * self.n
+        return total
+    # promedio de x
+    def avgX(self):
+        total = 0
+        total = sum(self.x) / self.n
+        return total
+    #promedio de y
+    def avgY(self):
+        total = 0
+        total = sum(self.y)/self.n
+        return total
+
+#multiplecion de promedio de "x" y "Y"
+    def MultAvgXY(self):
+        avg_x = self.avgMenosx()
+        avg_y = self.avgMenosy()
+        contenedor = []
+        for elet, elet2 in zip(avg_x, avg_y):
+            contenedor.append(elet * elet2)
+        total = sum(contenedor)
+        return total
+
+    def avgMenosx(self):
+        total = []
+        for elemt in self.x:
+            total.append(elemt - self.avgX())
+        return total
+
+    def avgMenosy(self):
+        total = []
+        for elemt in self.y:
+            total.append(elemt - self.avgY())
+        return total
+    #al  cuadrado de mdeia de x
+    def avgXx(self):
+        contador = 0
+        total = 0
+        for elemt in self.x:
+            contador = elemt - self.avgX()
+            calsquad = contador**2
+            total += calsquad
+        return total
+            
+    #al  cuadrado de mdeia de y
+    def avgYy(self):
+        total = 0
+        resta = 0
+        for elemt in self.y:
+            resta = elemt - self.avgY()
+            calsquad = resta**2
+            total+=calsquad
+        return total
+
+    def raizcuadradax(self):
+        numero = self.avgXx()
+        total = math.sqrt(numero)
+        return total
+    
+    def raizcuadraday(self):
+        numero = self.avgYy()
+        total = math.sqrt(numero)
+        return total
+
+
+
+    def sumxy(self):
+        # Utilizamos comprensión de listas para calcular xy para cada par (x, y)
+        xy_values = [xi * yi for xi, yi in zip(self.x, self.y)]
+        total = sum(xy_values)
+        return total
+    
+    
+    
+    #sumX  * sumY
+    def sumxsumy(self):
+        calcular = sum(self.x) * sum(self.y)
+        return calcular
+    
+    
+#############################    CLASE SIMPLERL     ##########################################
+class SimpleRL(Calculo):
+    def __init__(self,x,y,n) -> None:
+        super().__init__(x,y,n)
+
+    def numeradorB1(self):
+        total =  self.nsumxy() - self.sumxsumy()
+        return total
+        
+    def denominadorB1(self):
+       step1 =  self.sumxsquad() * self.n
+       total  = step1 - self.sumxSumx()
+       return total
+
+    def Beta1(self):
+        total = self.numeradorB1()/self.denominadorB1()
+        return round(total,6)
+    
+    def Beta0(self):
+        step1 =self.Beta1() * self.sumx()
+        step2 =self.sumy() - step1
+        total  = step2 /9
+        return round(total,6)
+    
+    def correlcionMult(self):
+        total =  self.raizcuadradax() * self.raizcuadraday()
+        return total
+
+    def numeradorCorrelacion(self):
+        total = self.MultAvgXY()
+        return total
+
+
+
+#################################   CLASE PRINCIPAL    ##################################
+
+class Principal(SimpleRL):
+    def __init__(self, x, y,n,varPred):
+        super().__init__(x, y,n)
+        self.varPred = varPred 
+
+    def IncognitaY(self):
+        predicion  =  self.Beta0() + self.Beta1() * self.varPred
+        return predicion
+
+
+    def CoeficienteCorrelacion(self):
+        total = 0
+        total = self.numeradorCorrelacion() / self.correlcionMult() 
+        return total
+
+    def Determinante(self):
+        CofCor = self.CoeficienteCorrelacion()
+        total = CofCor **2
+        return total
+
+    def __str__(self):
+        return f"Predicción: {self.all()}"
+#################################   FIN   #####################################
+
+
+
+########################################## DATA SET "X" y "Y" #####################
+
+# Inicialización de la clase Dataset
+sales = [651,762,856,1063,1190,1298,1421,1440,1518]
+adverting = [23,26,30,34,43,48,52,57,58]
+# Scatter plot
+
+#######################################     VALOR N     #############################
+n = len(adverting)
+
+####################################### OBJETOS Y INSTANCIAS ####################################
+
+
+var1,var2,var3,var4,var5 = 20,10,52,28,60
+
+
+sales_obj0 = Principal(adverting,sales,n,19)
+print("Beta0 es: ",sales_obj0.Beta0())
+print("Beta1 es: ",sales_obj0.Beta1())
+print(sales_obj0.IncognitaY())
+#print(sales_obj0.CoeficienteCorrelacion())
+print(sales_obj0.Determinante())
+
+print("\n------------------------------------------------------------")
+
+sales_obj1 = Principal(adverting,sales,n,var1)
+print(sales_obj1.IncognitaY())
+
+print("\n------------------------------------------------------------")
+
+sales_obj2 = Principal(adverting,sales,n,var2)
+print(sales_obj2.IncognitaY())
+
+print("\n------------------------------------------------------------")
+
+sales_obj3 = Principal(adverting,sales,n,var3)
+print(sales_obj3.IncognitaY())
+print("\n------------------------------------------------------------")
+
+sales_obj4 = Principal(adverting,sales,n,var4)
+print(sales_obj4.IncognitaY())
+print("\n------------------------------------------------------------")
+sales_obj5 = Principal(adverting,sales,n,var5)
+print(sales_obj5.IncognitaY())
+
+
+
+
+
+
+
+
